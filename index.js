@@ -1,5 +1,6 @@
 //A scroll story with a map.
 var map;
+var mapLayersAdded = [];
 
 //Layers
 var legendScale;
@@ -34,11 +35,8 @@ layerData = [{
         'source': 'waterpoints',
         'render': false,
         'legend': false,
-        // 'function': showFlow,
+        'function': commuteMode,
         'type': 'info',
-        'domain': 'The Water System',
-        'range': 'dot_cyan',
-        'icon': 'dams_cyan',
         'iconsize': ['interpolate', ['linear'],
             ['zoom'], 6, .08, 12, .1
         ],
@@ -62,12 +60,12 @@ layerData = [{
         'legend': false,
     }
     ,
-    {
-        "name": "A Generational Location",
-        "function": riverCruiseProgress,
-        'render': false,
-        'legend': false,
-    },
+    // {
+    //     "name": "A Generational Location",
+    //     "function": riverCruiseProgress,
+    //     'render': false,
+    //     'legend': false,
+    // },
     {
         "name": "Capacon Lodge, an AirBNB hotel",
         // "function": riverCruise,
@@ -81,8 +79,8 @@ layerData = [{
         'legend': false,
     },
     {
-        "name": "Top of the Rock: A lifetime of Epic Sunsets",
-        // "function": riverCruise,
+        "name": "A Timless Natural Ampitheatre",
+        "function": festival,
         'render': false,
         'legend': false,
     }
@@ -94,6 +92,7 @@ layerData = [{
 
 function scrollSetup() {
     // using d3 for convenience, and storing a selected elements
+
     var $container = d3.select('#scroll');
     var $graphic = $container.select('.map-holder');
 
@@ -153,9 +152,9 @@ function scrollSetup() {
     function stepProgress(response) {
         
         if (response.index == 2) {
-            riverCruiseProgress.frame(response.progress);
+            riverCruiseProgress().frame(response.progress);
         }
-        console.log(response);
+        // console.log(response);
         //riverCruiseProgress();
     }
 
@@ -188,6 +187,25 @@ function scrollSetup() {
 
 }
 
+
+function smoothScroll() {
+    console.log("scroll it up!")
+
+    d3.transition()
+    .delay(1500)
+    .duration(7500)
+    .tween("scroll", scrollTween(document.body.getBoundingClientRect().height - window.innerHeight));
+
+function scrollTween(offset) {
+  return function() {
+    var i = d3.interpolateNumber(window.pageYOffset || document.documentElement.scrollTop, offset);
+    return function(t) { scrollTo(0, i(t)); };
+  };
+}
+
+}
+
+
 ///DOC READY
 $(document).ready(function () {
     ////Map Init
@@ -209,37 +227,11 @@ $(document).ready(function () {
 
 
     map.on('load', function () {
-
         map.addControl(new mapboxgl.NavigationControl(), "top-right");
-        //add data sources.       
-        map.addSource('waterpoints', {
-            'type': 'geojson',
-            // 'cluster': true,
-            // 'clusterMaxZoom': 10,
-            // 'clusterRadius': 5,
-            'data': waterpoints
-        });
-
-        // map.addSource('cgb-canals', {
-        //     type: 'vector',
-        //     url: 'mapbox://perceptivcartifact.6ro0cswc'
-        // });
-
-        // map.addSource('swp-conveyances', {
-        //     type: 'vector',
-        //     url: 'mapbox://perceptivcartifact.2yx94rcr'
-        // });
-
-        // map.addSource('ca-rivers', {
-        //     type: 'vector',
-        //     url: 'mapbox://perceptivcartifact.dq4trbue'
-        // });
-
-
-        // console.log(map.getStyle().layers);
+        console.log(map.getStyle().layers);
         // console.log(map.getSource('composite').vectorLayerIds);
         addLayers();
-        // createLegend(legendScale);
+        createLegend(legendScale);
         // createGeocoder();
         scrollSetup();
         // d3.timeout(showFlow, 1000)
@@ -303,53 +295,66 @@ $(document).ready(function () {
 });
 
 function createLegend(scale) {
+    console.log('legend');
     d3.select('#map-legend').remove();
-    var title = d3.select("#copy-ux").insert("div", "#controls").attr("id", "map-title").html("California's State Water Project")
-    var deck = d3.select("#copy-ux").insert("div", "#controls").attr("id", "map-deck").classed('small-copy', true).html("<div><ul><li>Serves 1 in 12 Americans (27 million Californians) with high-quality, affordable water supplies</li><li>Irrigates 750,000 acres of farmland</li><li>Sustains California’s X billion economy</li></ul></div>")
-    var instructions = d3.select("#copy-ux").insert("div", "#controls").attr("id", "map-instructions").classed('small-copy', true).html("<div>Hover over legend items to learn more about the water system</div>")
+    var title = d3.select("#copy-ux").insert("div", "#controls").attr("id", "map-title").html("Views");
 
-    var legend = d3.select("#copy-ux").insert("div", "#controls").attr("id", "map-legend").html('Legend')
+    // var deck = d3.select("#copy-ux").insert("div", "#controls").attr("id", "map-deck").classed('small-copy', true).html("<div><ul><li>Serves 1 in 12 Americans (27 million Californians) with high-quality, affordable water supplies</li><li>Irrigates 750,000 acres of farmland</li><li>Sustains California’s X billion economy</li></ul></div>")
+    // var instructions = d3.select("#copy-ux").insert("div", "#controls").attr("id", "map-instructions").classed('small-copy', true).html("<div>Hover over legend items to learn more about the water system</div>")
 
-    var legendItems = legend.selectAll('div').data(layerData.filter(d => d.legend == true)).join('div').classed('legend-item-holder', true)
-        .on('mouseover', function (e, d) {
-            legendItems.selectAll('.legend-item-label').style('font-weight', 300);
-            d3.select(this).selectAll('.legend-item-label').style('font-weight', 600);
-            layerActions(d);
-        })
-        .on('mouseleave', function (e, d) {
-            legendItems.selectAll('.legend-item-label').style('font-weight', '300');
-            layerReset(d);
-        })
+    // var legend = d3.select("#copy-ux").insert("div", "#controls").attr("id", "map-legend").html('Legend')
 
-    legendItems.append('img').attr('src', d => 'icons/' + scale(d.domain) + '.svg').classed('legend-item-icon', true).style('height', function (d) {
-        if (d.iconsize) {
+    // var legendItems = legend.selectAll('div').data(layerData.filter(d => d.legend == true)).join('div').classed('legend-item-holder', true)
+    //     .on('mouseover', function (e, d) {
+    //         legendItems.selectAll('.legend-item-label').style('font-weight', 300);
+    //         d3.select(this).selectAll('.legend-item-label').style('font-weight', 600);
+    //         layerActions(d);
+    //     })
+    //     .on('mouseleave', function (e, d) {
+    //         legendItems.selectAll('.legend-item-label').style('font-weight', '300');
+    //         layerReset(d);
+    //     })
 
-            var m;
-            if (Array.isArray(d.iconsize)) {
+    // legendItems.append('img').attr('src', d => 'icons/' + scale(d.domain) + '.svg').classed('legend-item-icon', true).style('height', function (d) {
+    //     if (d.iconsize) {
 
-                m = d.iconsize[4];
+    //         var m;
+    //         if (Array.isArray(d.iconsize)) {
 
-            } else {
-                m = d.iconsize
-            }
+    //             m = d.iconsize[4];
 
-            return String(m * 100) + 'px';
-        } else {
-            return "25px";
-        }
+    //         } else {
+    //             m = d.iconsize
+    //         }
+
+    //         return String(m * 100) + 'px';
+    //     } else {
+    //         return "25px";
+    //     }
+    // });
+
+    var legend = d3.select("#copy-ux").insert("div", "#controls").attr("id", "map-legend");
+    var legendItems = legend.selectAll('div').data(layerData).join('div').classed('legend-item-holder', true)
+    .on('click', function (e, d) {
+        legendItems.selectAll('.legend-item-label').style('font-weight', 300);
+        d3.select(this).selectAll('.legend-item-label').style('font-weight', 600);
+        smoothScroll();
+        // layerActions(d);
     });
 
+
     legendItems.append('div').html(d => d.name).classed('legend-item-label', true);
+
+
+
 }
 
 function layerActions(d) {
     console.log(d);
-    //UX
-
     searchLayers = [d.domain];
 
     if (d.function) {
-        layerReset();
+        // layerReset();
         d.function();
         return;
     }
@@ -520,10 +525,78 @@ function intro() {
             // essential: true
         });
     }
-  }
+}
+
+function commuteMode() {
+    console.log(map.getStyle().layers);
+
+    // d3.selectAll('.mapboxgl-popup').remove();
+
+    if (!map.getSource('urban-centers')) {
+        map.addSource('urban-centers', {
+            'type': 'geojson',
+            'data': urbanCentersData
+
+        });
+    }
+
+    map.addLayer({
+        'id': 'urban-centers',
+        'type': 'symbol',
+        'source': 'urban-centers',
+        'layout': {
+            'icon-image': '1b_dot_sm',
+            'icon-anchor': 'center',
+            'icon-size': 1,
+            'icon-allow-overlap': true
+        }
+    });
+
+
+    //draw the route to the location
+    var sideling_x = sidelingSite.features[0].geometry.coordinates[0];
+    var sideling_y = sidelingSite.features[0].geometry.coordinates[1];
+    var sidelingCoords = sideling_y + ',' + sideling_x;
+
+    urbanCentersData.features.forEach(function (feature) {
+        var feature_x = feature.geometry.coordinates[0];
+        var feature_y = feature.geometry.coordinates[1];
+        var googleCoords = feature_y + ',' + feature_x;
+
+        const directionsService = new google.maps.DirectionsService();
+
+
+        directionsService.route(
+            {
+                    origin: googleCoords,
+                    destination: sidelingCoords,
+                    travelMode: "DRIVING"
+            },
+            (response, status) => {
+                //console.log(response);
+                var route = {
+                    'type': 'LineString',
+                    'coordinates': []
+                };
+                var path = response.routes[0].overview_path;
+                path.forEach(d => {
+                    // console.log(d);
+                    route['coordinates'].push([d.lng(), d.lat()]);
+                })
+                addNeighborhoodRouteG(route, feature.properties.Name);
+                createClearPopUpG(feature, response);
+                // commuteLegend(response, feature.properties.Name); 
+
+               }
+        )
+
+    })
+
+
+}
 
 function riverCruiseProgress() {
-
+    var apis = {};
     const pinRoute = riverCruiseLine.features[0].geometry.coordinates;
     var popupOffsets = {
     'top': [0, 0],
@@ -601,7 +674,7 @@ function riverCruiseProgress() {
 
     // let start;
 
-    function frame(progress) {
+    apis.frame = function(progress) {
         console.log("aniframe!");
         //start is undefined, as it is when the animation is started - set it to the current moment.
         // if (!start) start = time;
@@ -679,10 +752,21 @@ function riverCruiseProgress() {
     }
 
     // window.requestAnimationFrame(frame);
-
+    return apis;
 }
 
+function festival(){
+    map.flyTo({
+        center: [-78.334069, 39.622421],
+        zoom: 15.58, // starting zoom
+        bearing: -45.60, //bearing
+        pitch: 62,
+        duration: 2000,
+        curve: .1
+        // essential: true
+    });
 
+}
 
 function riverCruise() {
 
@@ -841,40 +925,6 @@ function riverCruise() {
             
             window.requestAnimationFrame(frame);
 
-}
-    
-function enableLineAnimation(layerId) {
-    console.log("animating " + layerId);
-    // if (animations.layerId) {clearInterval(animations.layerId);}
-
-
-    var step = 0;
-
-    let dashArraySeq = [
-        [0, 4, 3],
-        [1, 4, 2],
-        [2, 4, 1],
-        [3, 4, 0],
-        [0, 1, 3, 3],
-        [0, 2, 3, 2],
-        [0, 3, 3, 1]
-    ];
-
-
-    let dashArraySeq2 = [
-        [0, 3, 4],
-        [1, 3, 3],
-        [2, 4, 1],
-        [3, 4, 0],
-        [0, 1, 3, 3],
-        [0, 2, 3, 2],
-        [0, 3, 3, 1]
-    ];
-
-    animations.layerId = d3.interval(() => {
-        step = (step + 1) % dashArraySeq.length;
-        map.setPaintProperty(layerId, 'line-dasharray', dashArraySeq[step]);
-    }, animationStep);
 }
 
 function showFlow() {
@@ -1066,6 +1116,202 @@ function showFlow() {
     }
 
     window.requestAnimationFrame(frame);
+
+}
+
+//UTILITIY
+function enableLineAnimation(layerId) {
+    console.log("animating " + layerId);
+    // if (animations.layerId) {clearInterval(animations.layerId);}
+
+
+    var step = 0;
+
+    let dashArraySeq = [
+        [0, 4, 3],
+        [1, 4, 2],
+        [2, 4, 1],
+        [3, 4, 0],
+        [0, 1, 3, 3],
+        [0, 2, 3, 2],
+        [0, 3, 3, 1]
+    ];
+
+
+    let dashArraySeq2 = [
+        [0, 3, 4],
+        [1, 3, 3],
+        [2, 4, 1],
+        [3, 4, 0],
+        [0, 1, 3, 3],
+        [0, 2, 3, 2],
+        [0, 3, 3, 1]
+    ];
+
+    animations.layerId = d3.interval(() => {
+        step = (step + 1) % dashArraySeq.length;
+        map.setPaintProperty(layerId, 'line-dasharray', dashArraySeq[step]);
+    }, animationStep);
+}
+
+function animateLine(layerName, route, duration) {
+    console.log(route);
+    var pinRoute = route.coordinates;
+    // The total animation duration, in milliseconds
+    const animationDuration = duration;
+    // Use the https://turfjs.org/ library to calculate line distances and
+    // sample the line at a given percentage with the turf.along function.
+    const path = turf.lineString(pinRoute);
+    // Get the total line distance
+    const pathDistance = turf.lineDistance(path);
+    const startZoom = map.getZoom();
+    var zoomScale = d3.scaleLinear([startZoom, 13.3], [0, 1]);
+    const startBearing = map.getBearing();
+    var bearingScale = d3.scaleLinear([startBearing, 80], [0, 1]);
+    const startPitch = map.getPitch();
+    var pitchScale = d3.scaleLinear([startPitch, 52], [0, 1]);
+    const centerStart = map.getCenter();
+    var centerXScale = d3.scaleLinear([centerStart.lng, 30.088995292191214], [0, 1]);
+    var centerYScale = d3.scaleLinear([centerStart.lat, -1.9056191853016458], [0, 1]);
+
+    let start;
+
+    function frame(time) {
+        //start is undefined, as it is when the animation is started - set it to the current moment.
+        if (!start) start = time;
+        //create a variable for the nanimation phase which simply the point in time we are in in the animation devided by the animation total lnegth
+        //essentially a percentage finished.
+        const animationPhase = (time - start) / animationDuration;
+        var easePhase = d3.easeQuadInOut(animationPhase);
+
+        //Stop the animation when we reach 1
+        if (animationPhase > 1) {
+            map.removeLayer(layerName);
+            marker.remove();
+            return;
+        }
+        // Get the new latitude and longitude by sampling along the path
+        const alongPath = turf.along(path, pathDistance * easePhase)
+            .geometry.coordinates;
+
+        const lngLat = {
+            lng: alongPath[0],
+            lat: alongPath[1]
+        };
+
+        const distance = pathDistance * animationPhase;
+
+        // Reduce the visible length of the line by using a line-gradient to cutoff the line
+        // animationPhase is a value between 0 and 1 that reprents the progress of the animation
+        
+        map.setPaintProperty(layerName, 'line-gradient', ['step', ['line-progress'], '#1BB53B', easePhase, 'rgba(0, 255, 0, 0)']);
+
+        // Rotate the camera at a slightly lower speed to give some parallax effect in the background25.59999999999968
+        // const rotation = 150 - animationPhase * 40.0
+        const rotation = startBearing + animationPhase * 30.0
+        //const rotation = (startBearing - 60) * animationPhase;
+        const zoom = (13.252945685535897 - startZoom) * animationPhase;
+
+        //Center: LngLat(30.083257101936937, -1.9053182529979864)Zoom: 13.252945685535897 Pitch: 61.373225926465786 Bearing: 57.63311399999748
+
+        // map.setBearing(rotation % 360);
+        //map.setBearing(map.getBearing() + .2);
+
+
+        //console.log(animationPhase);
+        // map.setZoom(zoomScale.invert(animationPhase));
+        // map.setPitch(pitchScale.invert(animationPhase));
+        // map.setBearing(bearingScale.invert(animationPhase));
+        //console.log(centerStart);
+        //console.log(lngLat);
+        var tempFeature = turf.multiPoint([
+            [centerStart.lng, centerStart.lat],
+            [lngLat.lng, lngLat.lat]
+        ]);
+        //var centroid = turf.centroid(tempFeature);
+        //console.log(centroid.geometry.coordinates[0]);
+
+        // map.setCenter({lng: centerXScale.invert(animationPhase), lat: centerYScale.invert(animationPhase)});
+
+        window.requestAnimationFrame(frame);
+    }
+
+    window.requestAnimationFrame(frame);
+
+}
+
+function addNeighborhoodRouteG(route, layerName) {
+
+    layerName = layerName + "G";
+    //console.log(route);
+
+    if (map.getLayer(layerName)) map.removeLayer(layerName);
+    if (map.getSource(layerName)) map.removeSource(layerName);
+
+    map.addSource(layerName, {
+        'type': 'geojson',
+        'data': {
+            'type': 'Feature',
+            'properties': {},
+            'geometry': route
+        }
+    });
+
+    map.addLayer({
+        'id': layerName,
+        'type': 'line',
+        'source': layerName,
+        'layout': {
+            'line-join': 'miter',
+            'line-cap': 'round'
+        },
+        'paint': {
+            'line-color': '#1BB53B',
+            'line-width': 3,
+            'line-opacity': .7
+            // 'line-width': 1.5,
+            // 'line-dasharray': [2, 3],
+        }
+    });
+
+    if (!mapLayersAdded.includes(layerName)) {
+        mapLayersAdded.push(layerName);
+    };
+
+
+    map.moveLayer(layerName, 'lots-line');
+    animateLine(layerName, route, 2000);
+}
+
+function createClearPopUpG(feature, directionsData) {
+
+    // console.log(directionsData);
+    var duration = directionsData.routes[0].legs[0].duration.text;
+    //ADD POP UP
+    // var popUps = document.getElementsByClassName('mapboxgl-popup');
+    // if (popUps[0]) popUps[0].remove();
+
+    var popup = new mapboxgl.Popup({
+            offset: [0, 0],
+            className: 'clear-popup'
+        })
+        .setLngLat(feature.geometry.coordinates)
+        .setHTML(
+            '<h3>' + feature.properties.Name + '</h3>' +
+            '<h4>' + duration + '</h4>'
+        )
+        .addTo(map);
+
+
+    //draw the route to the location
+    var tenx_x = sidelingSite.features[0].geometry.coordinates[0];
+    var tenx_y = sidelingSite.features[0].geometry.coordinates[1];
+    var feature_x = feature.geometry.coordinates[0];
+    var feature_y = feature.geometry.coordinates[1];
+
+
+    //directions example request.
+    var reqUrl = "https://api.mapbox.com/directions/v5/mapbox/cycling/" + tenx_x + '%2C' + tenx_y + '%3B' + feature_x + '%2C' + feature_y + '?alternatives=false&geometries=geojson&steps=false&access_token=pk.eyJ1IjoiY2l6emxlIiwiYSI6ImNrcDJ0MjhteTE5cGsyb213bms0dHp6c3QifQ.-dc9k9y6KKnDlE5UszjS9A';
 
 }
 
@@ -1267,6 +1513,23 @@ function createGeocoder() {
 
 }
 ////mapData
+var sidelingSite = {
+    "type": "FeatureCollection",
+    "features": [{
+        "type": "Feature",
+        "geometry": {
+            "type": "Point",
+            "coordinates": [-78.32966189783048, 39.62083750598626],
+        },
+        "properties": {
+            "Name": "Sideling Hill Montain",
+            "Category": "Primary",
+            "Address": "1 Pecks Road, Great Cacapon, WV 25422",
+            "Google Business URL": ""
+        }
+    }]
+}
+
 var waterpoints = {
     "type": "FeatureCollection",
     "name": "waterpoints_ca",
@@ -43287,5 +43550,57 @@ const riverCruiseLine = {
     { "type": "Feature", "properties": { "id": 1 }, "geometry": { "type": "LineString", "coordinates":  [ [ -78.286450981335832, 39.621715754228212 ], [ -78.292829248645859, 39.624125321878665 ], [ -78.298640558861649, 39.626534889529118 ], [ -78.306365349270465, 39.629440544637021 ], [ -78.311822311302379, 39.631212285556472 ], [ -78.315011444957392, 39.631637503377135 ], [ -78.318554926796295, 39.632984026475924 ], [ -78.321177103357073, 39.633905331754036 ], [ -78.324791454832763, 39.634401419211486 ], [ -78.328193197398107, 39.635677072673488 ], [ -78.332091027420901, 39.636810986861938 ], [ -78.334996682528796, 39.637732292140051 ], [ -78.33939060000904, 39.63858272778139 ], [ -78.344422344220277, 39.639291424149171 ], [ -78.34846191351663, 39.640141859790504 ], [ -78.351651047171643, 39.640992295431843 ], [ -78.355903225378327, 39.640921425795064 ], [ -78.358950619759781, 39.639645772333061 ], [ -78.35958844649079, 39.637944901050382 ], [ -78.359517576854017, 39.635960551220599 ] ] 
    } }
     ]
-    }
+}
+
+var urbanCentersData = {
+    "type": "FeatureCollection",
+    "name": "neighborhoods",
+    "crs": {
+        "type": "name",
+        "properties": {
+            "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+        }
+    },
+    "features": [{
+            "type": "Feature",
+            "properties": {
+                "Name": "Washington DC",
+                "description": null,
+                "timestamp": null,
+                "begin": null,
+                "end": null,
+                "altitudeMode": null,
+                "tessellate": -1,
+                "extrude": 0,
+                "visibility": -1,
+                "drawOrder": null,
+                "icon": null
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [-77.037118641235, 38.90371417174988, 0.0]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "Name": "Baltimore",
+                "description": null,
+                "timestamp": null,
+                "begin": null,
+                "end": null,
+                "altitudeMode": null,
+                "tessellate": -1,
+                "extrude": 0,
+                "visibility": -1,
+                "drawOrder": null,
+                "icon": null
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [-76.6092127992475, 39.294566274937, 0.0]
+            }
+        }
+    ]
+}
     
