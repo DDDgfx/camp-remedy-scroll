@@ -190,7 +190,7 @@ function scrollSetup() {
 
 
 function smoothScroll(el) {
-    console.log("scroll it up!")
+    console.log("scroll it down!")
     console.log(el);
 
     var scrollable = d3.select(el);
@@ -347,8 +347,8 @@ function createLegend(scale) {
     .on('click', function (e, d) {
         legendItems.selectAll('.legend-item-label').style('font-weight', 300);
         d3.select(this).selectAll('.legend-item-label').style('font-weight', 600);
-        // console.log(d);
-        var layerIndex = layerData.indexOf(l => d.name == l.name);
+        console.log(d);
+        var layerIndex = layerData.lastIndexOf(l => d.name == l.name);
         console.log(layerIndex);
         smoothScroll("l-" + layerIndex);
         // layerActions(d);
