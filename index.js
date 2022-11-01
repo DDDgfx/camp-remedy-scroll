@@ -152,9 +152,10 @@ function scrollSetup() {
 
     function stepProgress(response) {
         
-        if (response.index == 2) {
-            riverCruiseProgress().frame(response.progress);
-        }
+        // if (response.index == 2) {
+        //     riverCruiseProgress().frame(response.progress);
+        // }
+
         // console.log(response);
         //riverCruiseProgress();
     }
@@ -192,18 +193,26 @@ function scrollSetup() {
 function smoothScroll(el) {
     console.log("scroll it down!")
     console.log(el);
+    var mult = Number(el.split("-")[1]) + 1;
 
-    var scrollable = d3.select(el);
+    var scrollable = d3.select("#" + el);
 
-    var scrollheight = scrollable.property("scrollHeight"); 
+    var scrollheight = scrollable.property("scrollHeight");
+    var introHeight = d3.select("#scroll").property("scrollTop");
 
+    
+    console.log(introHeight);
+    console.log(mult);
+
+    var scrollVal = scrollheight * mult;
     // d3.select("#scrollable").transition().duration(3000) 
     //     .tween("uniquetweenname", scrollTween(scrollheight)); 
+    console.log(scrollVal);
 
-    // d3.transition()
-    // // .delay(1500)
-    // .duration(1000)
-    // .tween("scroll", scrollTween(document.body.getBoundingClientRect().height - window.innerHeight));
+    d3.transition()
+    // .delay(1500)
+    .duration(500)
+    .tween("scroll", scrollTween(scrollVal + 200));
 
     function scrollTween(offset) {
     return function() {
@@ -348,10 +357,9 @@ function createLegend(scale) {
         legendItems.selectAll('.legend-item-label').style('font-weight', 300);
         d3.select(this).selectAll('.legend-item-label').style('font-weight', 600);
         console.log(d);
-        var layerIndex = layerData.lastIndexOf(l => d.name == l.name);
-        console.log(layerIndex);
+        var layerIndex = layerData.findIndex(l => d.name == l.name);
         smoothScroll("l-" + layerIndex);
-        // layerActions(d);
+        d.function();
     });
 
 
