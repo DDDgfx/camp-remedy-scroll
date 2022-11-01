@@ -101,7 +101,8 @@ function scrollSetup() {
 
     var $step = $text.selectAll('.content-layer')
         .data(layerData).join('div')
-        .classed('content-layer', true);
+        .classed('content-layer', true)
+        .attr('id', (d, i) => "l-" + i );
     // .datum(d => d);
 
     $step.append('div').classed('layer-title', true).html(d => d.name);
@@ -140,7 +141,7 @@ function scrollSetup() {
             return i === response.index;
         })
 
-        layerActions(layerNow);
+        // layerActions(layerNow);
 
         // update graphic based on step here
         // var stepData = $step.datum();
@@ -188,20 +189,28 @@ function scrollSetup() {
 }
 
 
-function smoothScroll() {
+function smoothScroll(el) {
     console.log("scroll it up!")
+    console.log(el);
 
-    d3.transition()
-    .delay(1500)
-    .duration(7500)
-    .tween("scroll", scrollTween(document.body.getBoundingClientRect().height - window.innerHeight));
+    var scrollable = d3.select(el);
 
-function scrollTween(offset) {
-  return function() {
-    var i = d3.interpolateNumber(window.pageYOffset || document.documentElement.scrollTop, offset);
-    return function(t) { scrollTo(0, i(t)); };
-  };
-}
+    var scrollheight = scrollable.property("scrollHeight"); 
+
+    // d3.select("#scrollable").transition().duration(3000) 
+    //     .tween("uniquetweenname", scrollTween(scrollheight)); 
+
+    // d3.transition()
+    // // .delay(1500)
+    // .duration(1000)
+    // .tween("scroll", scrollTween(document.body.getBoundingClientRect().height - window.innerHeight));
+
+    function scrollTween(offset) {
+    return function() {
+        var i = d3.interpolateNumber(window.pageYOffset || document.documentElement.scrollTop, offset);
+        return function(t) { scrollTo(0, i(t)); };
+    };
+    }
 
 }
 
@@ -338,7 +347,10 @@ function createLegend(scale) {
     .on('click', function (e, d) {
         legendItems.selectAll('.legend-item-label').style('font-weight', 300);
         d3.select(this).selectAll('.legend-item-label').style('font-weight', 600);
-        smoothScroll();
+        // console.log(d);
+        var layerIndex = layerData.indexOf(l => d.name == l.name);
+        console.log(layerIndex);
+        smoothScroll("l-" + layerIndex);
         // layerActions(d);
     });
 
