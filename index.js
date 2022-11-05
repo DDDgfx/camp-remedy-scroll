@@ -68,13 +68,13 @@ layerData = [{
     // },
     {
         "name": "Capacon Lodge, an AirBNB hotel",
-        // "function": riverCruise,
+        "function": cacaponLodge,
         'render': false,
         'legend': false,
     },
     {
         "name": "Sideling Estates Phase 1",
-        // "function": riverCruise,
+        "function": sidelingEstates,
         'render': false,
         'legend': false,
     },
@@ -201,10 +201,8 @@ function smoothScroll(el) {
     var introHeight = d3.select("#scroll").property("scrollTop");
 
     
-    console.log(introHeight);
-    console.log(mult);
 
-    var scrollVal = scrollheight * mult;
+    var scrollVal = (scrollheight * mult) + (50 * mult);
     // d3.select("#scrollable").transition().duration(3000) 
     //     .tween("uniquetweenname", scrollTween(scrollheight)); 
     console.log(scrollVal);
@@ -212,7 +210,7 @@ function smoothScroll(el) {
     d3.transition()
     // .delay(1500)
     .duration(500)
-    .tween("scroll", scrollTween(scrollVal + 200));
+    .tween("scroll", scrollTween(scrollVal));
 
     function scrollTween(offset) {
     return function() {
@@ -548,7 +546,24 @@ function intro() {
 }
 
 function commuteMode() {
+    map.fitBounds([
+        [-80.36662605773022, 36.45164258254058],
+        [-75.06159551921587, 40.09318373444462]
+    ], {
+        bearing: 0,
+        pitch: 0
+    });
     console.log(map.getStyle().layers);
+
+    // map.flyTo({
+    //     center: [-78.334069, 39.622421],
+    //     zoom: 15.58, // starting zoom
+    //     bearing: -45.60, //bearing
+    //     pitch: 62,
+    //     duration: 2000,
+    //     curve: .1
+    //     // essential: true
+    // });
 
     // d3.selectAll('.mapboxgl-popup').remove();
 
@@ -776,6 +791,32 @@ function riverCruiseProgress() {
 }
 
 function festival(){
+    map.flyTo({
+        center: [-78.334069, 39.622421],
+        zoom: 15.58, // starting zoom
+        bearing: -45.60, //bearing
+        pitch: 62,
+        duration: 2000,
+        curve: .1
+        // essential: true
+    });
+
+}
+
+function sidelingEstates(){
+    map.flyTo({
+        center: [-78.334069, 39.622421],
+        zoom: 15.58, // starting zoom
+        bearing: -45.60, //bearing
+        pitch: 62,
+        duration: 2000,
+        curve: .1
+        // essential: true
+    });
+
+}
+
+function cacaponLodge(){
     map.flyTo({
         center: [-78.334069, 39.622421],
         zoom: 15.58, // starting zoom
@@ -1206,8 +1247,8 @@ function animateLine(layerName, route, duration) {
 
         //Stop the animation when we reach 1
         if (animationPhase > 1) {
-            map.removeLayer(layerName);
-            marker.remove();
+            // map.removeLayer(layerName);
+            // marker.remove();
             return;
         }
         // Get the new latitude and longitude by sampling along the path

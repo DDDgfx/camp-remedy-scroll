@@ -87,6 +87,7 @@ h1, h2, h3 {
   /* max-width: 20rem; */
   color: #fff;
   /* background-color: pink; */
+  pointer-events: none;
 }
 
 .content-layer.is-active {
@@ -100,6 +101,7 @@ h1, h2, h3 {
   max-width: 70%;
   margin: 0 auto;
   text-align: center;
+  pointer-events: none;
   /* margin: 0px; */
   
 }
