@@ -192,113 +192,6 @@ $(document).ready(function () {
 
 });
 
-function scrollSetup() {
-    // using d3 for convenience, and storing a selected elements
-
-    var $container = d3.select('#scroll');
-    var $graphic = $container.select('.map-holder');
-
-    var $chart = $graphic.select('.chart');
-    var $text = $container.select('.scroll-copy');
-
-    var $step = $text.selectAll('.content-layer')
-        .data(layerData).join('div')
-        .classed('content-layer', true)
-        .attr('id', (d, i) => "l-" + i );
-    // .datum(d => d);
-
-    $step.append('div').classed('layer-title', true).html(d => d.name);
-
-    // resize function to set dimensions on load and on page resize
-    function handleResize() {
-        // 1. update height of step elements for breathing room between steps
-        var stepHeight = Math.floor(window.innerHeight * 0.75);
-        $step.style('height', stepHeight + 'px');
-
-        var figureHeight = window.innerHeight;
-        var figureMarginTop = (window.innerHeight - figureHeight);
-
-        $graphic.style("height", figureHeight + "px").style("top", figureMarginTop + "px");
-
-        map.resize();
-
-
-        map.fitBounds([
-            [-80.36662605773022, 36.45164258254058],
-            [-75.06159551921587, 40.09318373444462]
-        ], {
-            bearing: 0,
-            pitch: 0
-        });
-
-
-        // 4. tell scrollama to update new element dimensions
-        scroller.resize();
-
-    };
-
-    // scrollama event handlers
-    function handleStepEnter(response) {
-        // response = { element, direction, index }
-        console.log("step enter");
-        var layerNow = d3.select(response.element).datum();
-
-
-        // $graphic.classed('is-fixed', true);
-
-        // fade in current step
-        $step.classed('is-active', function (d, i) {
-            return i === response.index;
-        })
-
-        // layerActions(layerNow);
-
-        // update graphic based on step here
-        // var stepData = $step.datum();
-
-        // console.log(stepData);
-
-    }
-
-    function stepProgress(response) {
-        
-        // if (response.index == 2) {
-        //     riverCruiseProgress().frame(response.progress);
-        // }
-
-        // console.log(response);
-        //riverCruiseProgress();
-    }
-
-    // kick-off code to run once on load
-    function init() {
-        console.log("prep scroll");
-        // 1. call a resize on load to update width/height/position of elements
-        handleResize();
-
-        // 2. setup the scrollama instance
-        // 3. bind scrollama event handlers (this can be chained like below)
-        scroller.setup({
-                graphic: '.map-holder', // the graphic
-                text: '#scroll .scroll-copy .content-layer', // the step container
-                step: '.content-layer', // the step elements
-                offset: 0.75, // set the trigger to be 1/2 way down screen
-                debug: false, // display the trigger offset for testing
-                progress: true,
-            })
-            .onStepEnter(handleStepEnter)
-            .onStepProgress(stepProgress);
-        // .onContainerEnter(handleContainerEnter)
-        // .onContainerExit(handleContainerExit);
-        // setup resize event
-        window.addEventListener('resize', handleResize);
-    };
-
-    // start it up
-    init();
-
-}
-
 function createLegend(scale) {
     console.log('legend');
     d3.select('#map-legend').remove();
@@ -1660,6 +1553,113 @@ function createGeocoder() {
 
     })
 
+
+}
+
+function scrollSetup() {
+    // using d3 for convenience, and storing a selected elements
+
+    var $container = d3.select('#scroll');
+    var $graphic = $container.select('.map-holder');
+
+    var $chart = $graphic.select('.chart');
+    var $text = $container.select('.scroll-copy');
+
+    var $step = $text.selectAll('.content-layer')
+        .data(layerData).join('div')
+        .classed('content-layer', true)
+        .attr('id', (d, i) => "l-" + i );
+    // .datum(d => d);
+
+    $step.append('div').classed('layer-title', true).html(d => d.name);
+
+    // resize function to set dimensions on load and on page resize
+    function handleResize() {
+        // 1. update height of step elements for breathing room between steps
+        var stepHeight = Math.floor(window.innerHeight * 0.75);
+        $step.style('height', stepHeight + 'px');
+
+        var figureHeight = window.innerHeight;
+        var figureMarginTop = (window.innerHeight - figureHeight);
+
+        $graphic.style("height", figureHeight + "px").style("top", figureMarginTop + "px");
+
+        map.resize();
+
+
+        map.fitBounds([
+            [-80.36662605773022, 36.45164258254058],
+            [-75.06159551921587, 40.09318373444462]
+        ], {
+            bearing: 0,
+            pitch: 0
+        });
+
+
+        // 4. tell scrollama to update new element dimensions
+        scroller.resize();
+
+    };
+
+    // scrollama event handlers
+    function handleStepEnter(response) {
+        // response = { element, direction, index }
+        console.log("step enter");
+        var layerNow = d3.select(response.element).datum();
+
+
+        // $graphic.classed('is-fixed', true);
+
+        // fade in current step
+        $step.classed('is-active', function (d, i) {
+            return i === response.index;
+        })
+
+        // layerActions(layerNow);
+
+        // update graphic based on step here
+        // var stepData = $step.datum();
+
+        // console.log(stepData);
+
+    }
+
+    function stepProgress(response) {
+        
+        // if (response.index == 2) {
+        //     riverCruiseProgress().frame(response.progress);
+        // }
+
+        // console.log(response);
+        //riverCruiseProgress();
+    }
+
+    // kick-off code to run once on load
+    function init() {
+        console.log("prep scroll");
+        // 1. call a resize on load to update width/height/position of elements
+        handleResize();
+
+        // 2. setup the scrollama instance
+        // 3. bind scrollama event handlers (this can be chained like below)
+        scroller.setup({
+                graphic: '.map-holder', // the graphic
+                text: '#scroll .scroll-copy .content-layer', // the step container
+                step: '.content-layer', // the step elements
+                offset: 0.75, // set the trigger to be 1/2 way down screen
+                debug: false, // display the trigger offset for testing
+                progress: true,
+            })
+            .onStepEnter(handleStepEnter)
+            .onStepProgress(stepProgress);
+        // .onContainerEnter(handleContainerEnter)
+        // .onContainerExit(handleContainerExit);
+        // setup resize event
+        window.addEventListener('resize', handleResize);
+    };
+
+    // start it up
+    init();
 
 }
 
