@@ -365,14 +365,14 @@ ul {
 .mapboxgl-popup-anchor-top-left .mapboxgl-popup-tip,
 .mapboxgl-popup-anchor-top-right .mapboxgl-popup-tip {
   border-bottom-color: white;
-  box-shadow: 4px 4px 4px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 4px 4px 4px -1px rgba(0, 0, 0, 0.0);
 }
 
 .mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip,
 .mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-tip,
 .mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {
   border-top-color: white;
-  box-shadow: 4px 4px 4px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 4px 4px 4px -1px rgba(0, 0, 0, 0.0);
 }
 
 .mapboxgl-popup-anchor-left .mapboxgl-popup-tip {
