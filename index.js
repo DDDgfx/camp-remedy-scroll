@@ -22,57 +22,23 @@ var geocoder = d3.select("#controls").insert("div", ":first-child").attr("id", "
 
 layerData = [{
         'name': "90 Minutes from D.C.",
-        'source': 'waterpoints',
-        'render': false,
-        'legend': false,
         'function': commuteMode,
-        'type': 'info',
-        'iconsize': ['interpolate', ['linear'],
-            ['zoom'], 6, .08, 12, .1
-        ],
-        'iconopacity': ['interpolate', ['linear'],
-            ['zoom'], 6, 1, 12, 1
-        ],
-        'iconanchor': 'center',
-        'color': '#E8AF22',
-        'field': 'Source',
-        'values': ['usbr'],
-        'labels': false,
-        'zoom': 10,
-        'pitch': -20,
-        'bearing': 0,
-        'center': []
     },
     {
         "name": "Paradise on the Potomac",
-        "function": zoomToProject,
-        'render': false,
-        'legend': false,
-    }
-    ,
-    // {
-    //     "name": "A Generational Location",
-    //     "function": riverCruiseProgress,
-    //     'render': false,
-    //     'legend': false,
-    // },
+        "function": zoomToProject
+    },
     {
         "name": "Capacon Lodge, an AirBNB hotel",
-        "function": cacaponLodge,
-        'render': false,
-        'legend': false,
+        "function": cacaponLodge
     },
     {
         "name": "Sideling Estates Phase 1",
-        "function": sidelingEstates,
-        'render': false,
-        'legend': false,
+        "function": sidelingEstates
     },
     {
         "name": "A Timless Natural Ampitheatre",
-        "function": festival,
-        'render': false,
-        'legend': false,
+        "function": festival
     }
 ];
 
@@ -1702,7 +1668,7 @@ var cacaponProject = {
         "type": "Feature",
         "geometry": {
             "type": "Point",
-            "coordinates": [-78.32966189783048, 39.62083750598626],
+            "coordinates": [-78.34111449049774, 39.62377024800164]
         },
         "properties": {
             "Name": "The Great Cacapon Project",
