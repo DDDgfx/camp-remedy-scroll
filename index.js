@@ -1,4 +1,4 @@
-//v1
+//v2
 
 //A scroll story with a map.
 var map;
