@@ -1,3 +1,5 @@
+//v1
+
 //A scroll story with a map.
 var map;
 var mapLayersAdded = [];
