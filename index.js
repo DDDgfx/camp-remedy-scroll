@@ -93,7 +93,7 @@ $(document).ready(function () {
         createMultiPopUp(cacaponProject.features[0]);
 
 
-        createLegend(legendScale);
+        // createLegend(legendScale);
         // createGeocoder();
 
 
@@ -1056,7 +1056,6 @@ function showFlow() {
 }
 
 
-
 //UTILITIY
 function enableLineAnimation(layerId) {
     console.log("animating " + layerId);
@@ -1435,96 +1434,10 @@ function createDirectionsPopUp(feature, directionsData) {
 
 }
 
-function forwardGeocoder(query) {
-    const matchingFeatures = [];
-    for (const feature of waterpoints.features) {
-        // Handle queries with different capitalization
-        // than the source data by calling toLowerCase().
-        if (
-            feature.properties.Name
-            .toLowerCase()
-            .includes(query.toLowerCase())
-        ) {
-            // Add a tree emoji as a prefix for custom
-            // data results using carmen geojson format:
-            // https://github.com/mapbox/carmen/blob/master/carmen-geojson.md
-            feature['place_name'] = `• ${feature.properties.Name}`;
-            feature['center'] = feature.geometry.coordinates;
-            feature['place_type'] = ['Water Infrastructure'];
-            matchingFeatures.push(feature);
-        }
-    }
-    return matchingFeatures;
-}
 
-function createGeocoder() {
-    geocoder = new MapboxGeocoder({
-        accessToken: mapboxgl.accessToken,
-        mapboxgl: mapboxgl,
-        localGeocoder: forwardGeocoder,
-        clearOnBlur: true,
-        // marker: {
-        //     color: '#3a76b7'
-        //     },
-        marker: false,
-        limit: 10,
-        collapsed: false,
-        bbox: [-128.535498, 33.662037, -114.945010, 43.598041],
-        flyTo: false,
-        placeholder: 'Search by location',
-        countries: 'us'
-    });
-    // Options are country, region, postcode, district, place, locality, neighborhood, address, and poi.
-    // [minX, minY, maxX, maxY]selection.insert("div",":first-child")
-
-    var geocodeInput = d3.select("#geocode-input");
-
-    document.getElementById('geocode-input').appendChild(geocoder.onAdd(map));
-
-    //Get the results!
-    geocoder.on('result', async (event) => {
-        console.log(event.result);
-        // When the geocoder returns a result
-        const point = event.result.center; // Capture the result coordinates
-
-        const tileset = 'perceptivcartifact.2wuagxwc'; // replace this with the ID of the tileset you created
-        const radius = 0; // 1609 meters is roughly equal to one mile
-        const limit = 50; // The maximum amount of results to return
-
-        map.flyTo({
-            center: point,
-            zoom: 10,
-            essential: true // this animation is considered essential with respect to prefers-reduced-motion
-        });
-
-        createPopUp(event.result);
-        addMarker(event.result);
-
-        const query = await fetch(
-            `https://api.mapbox.com/v4/${tileset}/tilequery/${point[0]},${point[1]}.json?limit=${limit}&access_token=${mapboxgl.accessToken}`, {
-                method: 'GET'
-            }
-        );
-        const json = await query.json();
-
-        // resultsList(json);
-
-    });
-
-    geocoder.on('clear', function (d) {
-
-        map.flyTo({
-            center: [-119.5, 37.50],
-            zoom: 4, // starting zoom
-            essential: true // this animation is considered essential with respect to prefers-reduced-motion
-        });
-
-    })
-
-
-}
 
 function scrollSetup() {
+    console.log('Scroll Setup');
     // using d3 for convenience, and storing a selected elements
 
     var $container = d3.select('#scroll');
@@ -1540,6 +1453,7 @@ function scrollSetup() {
     // .datum(d => d);
 
     $step.append('div').classed('layer-title', true).html(d => d.name);
+    $step.append('div').classed('layer-copy', true).html(d => d.copy);
 
     // resize function to set dimensions on load and on page resize
     function handleResize() {
@@ -1583,12 +1497,12 @@ function scrollSetup() {
             return i === response.index;
         })
 
-        // layerActions(layerNow);
+        layerActions(layerNow);
 
         // update graphic based on step here
-        // var stepData = $step.datum();
+        var stepData = $step.datum();
 
-        // console.log(stepData);
+        console.log(stepData);
 
     }
 
